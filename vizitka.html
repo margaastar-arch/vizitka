@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Марга АСТ — Внедрение ИИ</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:      #07223d;
+      --crimson: #8C2E47;
+      --orange:  #F28241;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ── Canvas: flow field ── */
+    #bg-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── Corner bracket decorations ── */
+    .corner {
+      position: fixed;
+      width: 30px; height: 30px;
+      pointer-events: none; z-index: 2;
+      border-style: solid;
+    }
+    .corner.tl { top: 22px; left: 22px;
+      border-color: rgba(242,130,65,.28); border-width: 1.5px 0 0 1.5px; }
+    .corner.tr { top: 22px; right: 22px;
+      border-color: rgba(242,130,65,.28); border-width: 1.5px 1.5px 0 0; }
+    .corner.bl { bottom: 22px; left: 22px;
+      border-color: rgba(140,46,71,.28); border-width: 0 0 1.5px 1.5px; }
+    .corner.br { bottom: 22px; right: 22px;
+      border-color: rgba(140,46,71,.28); border-width: 0 1.5px 1.5px 0; }
+
+    /* ── Structural ring — top right ── */
+    .ring-deco {
+      position: fixed;
+      top: -170px; right: -170px;
+      width: 460px; height: 460px;
+      border-radius: 50%;
+      border: 1px solid rgba(242,130,65,.06);
+      pointer-events: none; z-index: 1;
+    }
+    .ring-deco::before {
+      content: '';
+      position: absolute; inset: 55px;
+      border-radius: 50%;
+      border: 1px dashed rgba(140,46,71,.07);
+    }
+    .ring-deco::after {
+      content: '';
+      position: absolute; inset: 115px;
+      border-radius: 50%;
+      border: 1px solid rgba(242,130,65,.04);
+    }
+
+
+    /* ── Card ── */
+    .card {
+      position: relative;
+      z-index: 10;
+      width: min(480px, 92vw);
+      padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 5vw, 2.8rem);
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 4px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      text-align: center;
+      box-shadow:
+        inset 0 0 0 1px rgba(255,255,255,.05),
+        0 32px 80px rgba(0,0,0,.45);
+      animation: card-in .85s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    .card::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(135deg,
+        rgba(242,130,65,.1) 0%,
+        transparent 45%,
+        transparent 55%,
+        rgba(140,46,71,.08) 100%);
+      pointer-events: none; z-index: -1;
+    }
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(32px) scale(.94); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── Avatar ── */
+    .avatar-wrap {
+      width: 90px; height: 90px;
+      margin: 0 auto 1.6rem;
+      animation: pop-in .65s cubic-bezier(.34,1.56,.64,1) .18s both;
+    }
+    .avatar-ring {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      background: rgba(7,34,61,.9);
+      border: 3px solid rgba(242,130,65,.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .avatar-ring::before {
+      content: '';
+      position: absolute; inset: 6px;
+      border-radius: 50%;
+      border: 1px solid rgba(140,46,71,.3);
+      pointer-events: none;
+    }
+    @keyframes pop-in {
+      from { opacity: 0; transform: scale(.3) rotate(-25deg); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── Name ── */
+    .name {
+      font-size: clamp(2.5rem, 7.5vw, 4rem);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -1px;
+      background: linear-gradient(130deg, #F28241 0%, #d4686a 52%, #8C2E47 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 16px rgba(242,130,65,.28));
+      margin-bottom: 1.4rem;
+      animation: fade-up .65s ease .32s both;
+    }
+
+    /* ── Spec ── */
+    .spec {
+      color: rgba(255,255,255,.6);
+      font-size: clamp(.84rem, 2.4vw, .96rem);
+      font-weight: 300;
+      letter-spacing: .04em;
+      line-height: 1.75;
+      margin-bottom: 1.8rem;
+      animation: fade-up .65s ease .46s both;
+    }
+    .spec strong { color: var(--orange); font-weight: 600; }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: .8rem;
+      margin: 0 0 1.8rem;
+      animation: fade-up .65s ease .54s both;
+    }
+    .div-line {
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(242,130,65,.32), transparent);
+    }
+    .div-diamond {
+      width: 6px; height: 6px;
+      background: var(--orange);
+      transform: rotate(45deg);
+      flex-shrink: 0; opacity: .6;
+    }
+
+    /* ── Social icons ── */
+    .socials {
+      display: flex;
+      gap: .9rem;
+      justify-content: center;
+      margin-bottom: 1.8rem;
+      animation: fade-up .65s ease .64s both;
+    }
+    .social-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px; height: 52px;
+      border-radius: 3px;
+      border: 1px solid rgba(242,130,65,.2);
+      background: rgba(255,255,255,.03);
+      color: rgba(255,255,255,.62);
+      text-decoration: none;
+      position: relative;
+      overflow: hidden;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1),
+                  box-shadow .3s, border-color .3s, background .3s, color .3s;
+    }
+    .social-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--crimson), var(--orange));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .35s ease;
+    }
+    .social-link:hover {
+      transform: translateY(-6px);
+      border-color: rgba(242,130,65,.5);
+      background: rgba(242,130,65,.07);
+      box-shadow: 0 12px 28px rgba(0,0,0,.3), 0 0 0 1px rgba(242,130,65,.15);
+      color: #fff;
+    }
+    .social-link:hover::after { transform: scaleX(1); }
+    .social-link svg {
+      width: 22px; height: 22px; fill: currentColor;
+      transition: transform .3s ease;
+      position: relative; z-index: 1;
+    }
+    .social-link:hover svg { transform: scale(1.12); }
+
+    /* ── CTA button ── */
+    .cta {
+      display: inline-flex;
+      align-items: center;
+      gap: .55rem;
+      padding: .88rem 2.1rem;
+      border-radius: 3px;
+      border: 1.5px solid rgba(242,130,65,.42);
+      background: transparent;
+      color: var(--orange);
+      text-decoration: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .84rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1),
+                  box-shadow .3s, color .3s, border-color .3s;
+      animation: fade-up .65s ease .78s both;
+    }
+    .cta-fill {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--crimson) 0%, var(--orange) 100%);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .4s cubic-bezier(.76,0,.24,1);
+    }
+    .cta:hover .cta-fill { transform: scaleX(1); }
+    .cta:hover {
+      color: #fff;
+      border-color: transparent;
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(140,46,71,.35);
+    }
+    .cta > * { position: relative; z-index: 1; }
+    .cta svg { width: 15px; height: 15px; fill: currentColor; }
+
+    /* Ripple */
+    .ripple {
+      position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,.2);
+      transform: scale(0); pointer-events: none;
+      animation: ripple-out .7s ease-out forwards;
+    }
+    @keyframes ripple-out { to { transform: scale(7); opacity: 0; } }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    @media (max-width: 420px) {
+      .card { padding: 1.7rem 1.1rem; }
+      .corner { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Flow field canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- Structural geometry -->
+  <div class="ring-deco"></div>
+
+  <!-- Corner brackets -->
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="card">
+
+    <!-- Avatar: hexagram — two entities intersecting -->
+    <div class="avatar-wrap">
+      <div class="avatar-ring">
+        <svg width="76" height="76" viewBox="-25 -25 50 50" fill="none">
+          <!-- Technology — upward triangle (structure, logic) -->
+          <polygon points="0,-19 16.45,9.5 -16.45,9.5"
+            stroke="#F28241" stroke-width="2"
+            fill="rgba(242,130,65,.08)"/>
+          <!-- Creativity — downward triangle (imagination, design) -->
+          <polygon points="0,19 16.45,-9.5 -16.45,-9.5"
+            stroke="#8C2E47" stroke-width="2"
+            fill="rgba(140,46,71,.08)"/>
+          <!-- Six inner hexagram nodes -->
+          <circle cx="0"      cy="-9.5"  r="1.6" fill="#F28241" opacity=".75"/>
+          <circle cx="8.22"   cy="4.75"  r="1.6" fill="#F28241" opacity=".75"/>
+          <circle cx="-8.22"  cy="4.75"  r="1.6" fill="#F28241" opacity=".75"/>
+          <circle cx="0"      cy="9.5"   r="1.6" fill="#8C2E47" opacity=".75"/>
+          <circle cx="8.22"   cy="-4.75" r="1.6" fill="#8C2E47" opacity=".75"/>
+          <circle cx="-8.22"  cy="-4.75" r="1.6" fill="#8C2E47" opacity=".75"/>
+          <!-- Center — point of intersection -->
+          <circle r="5.5" fill="#F28241"/>
+          <!-- Cardinal ticks -->
+          <line x1="0"   y1="-22" x2="0"   y2="-17.5" stroke="#F28241" stroke-width="1.5" opacity=".55"/>
+          <line x1="22"  y1="0"   x2="17.5" y2="0"    stroke="#F28241" stroke-width="1.5" opacity=".55"/>
+          <line x1="0"   y1="22"  x2="0"   y2="17.5"  stroke="#F28241" stroke-width="1.5" opacity=".55"/>
+          <line x1="-22" y1="0"   x2="-17.5" y2="0"   stroke="#F28241" stroke-width="1.5" opacity=".55"/>
+        </svg>
+      </div>
+    </div>
+
+    <h1 class="name">Марга АСТ</h1>
+
+    <p class="spec">Внедрение ИИ: <strong>от идеи до профита</strong></p>
+
+    <div class="divider">
+      <div class="div-line"></div>
+      <div class="div-diamond"></div>
+      <div class="div-line"></div>
+    </div>
+
+    <div class="socials">
+      <a href="https://t.me/marga_ast" target="_blank" rel="noopener"
+         class="social-link" title="Telegram @marga_ast">
+        <svg viewBox="0 0 24 24">
+          <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+        </svg>
+      </a>
+    </div>
+
+    <a href="https://t.me/marga_ast" target="_blank" rel="noopener"
+       class="cta" id="cta-btn">
+      <div class="cta-fill"></div>
+      <svg viewBox="0 0 24 24"><path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      <span>Написать мне</span>
+    </a>
+
+  </div>
+
+  <script>
+    // ── Dual-spiral flow field ─────────────────────────────────────────
+    // Two counter-rotating logarithmic spiral attractors.
+    // Particles leave persistent trails (slow canvas fade = long strokes).
+    // Result: organic, layered, fractal-esque flowing structures.
+
+    const canvas = document.getElementById('bg-canvas');
+    const ctx    = canvas.getContext('2d');
+
+    let W, H, time = 0;
+    const N        = 1300;
+    const SPEED    = 1.35;
+    const FADE     = 'rgba(7,34,61,0.011)';
+    const DURATION = 10000;
+    const START    = performance.now();
+
+    // Typed arrays for performance
+    const px = new Float32Array(N);
+    const py = new Float32Array(N);
+    const pl = new Float32Array(N); // current life
+    const pm = new Float32Array(N); // max life
+    const pc = new Uint8Array(N);   // color index 0-2
+
+    function resetParticle(i) {
+      px[i] = Math.random() * W;
+      py[i] = Math.random() * H;
+      pl[i] = 0;
+      pm[i] = 160 + Math.random() * 220;
+      const rc = Math.random();
+      pc[i] = rc < .20 ? 0 : rc < .38 ? 1 : 2; // 20% orange, 18% crimson, 62% blue
+    }
+
+    function init() {
+      W = canvas.width  = innerWidth;
+      H = canvas.height = innerHeight;
+      for (let i = 0; i < N; i++) {
+        resetParticle(i);
+        pl[i] = Math.random() * pm[i]; // stagger initial ages
+      }
+    }
+    window.addEventListener('resize', () => { init(); ctx.clearRect(0,0,W,H); });
+    init();
+
+    // ── Field function ──
+    // Spiral centres are placed OUTSIDE the viewport so their convergence
+    // points are off-screen — no bright accumulation bands on the canvas.
+    // Large weight denominator (260) softens the gradient further.
+    function field(x, y) {
+      const s = 0.0026;
+
+      // Attractor A — outside left edge, clockwise
+      const ax = -W * 0.13, ay = H * 0.30;
+      const dax = x - ax, day = y - ay;
+      const distA = Math.sqrt(dax*dax + day*day) + 1;
+      const angA  = Math.atan2(day, dax)
+                  + Math.PI * 0.5
+                  + Math.log(distA * 0.007 + 0.1) * 0.85
+                  + time * 0.050;
+
+      // Attractor B — outside right edge, counter-clockwise
+      const bx = W * 1.13, by = H * 0.70;
+      const dbx = x - bx, dby = y - by;
+      const distB = Math.sqrt(dbx*dbx + dby*dby) + 1;
+      const angB  = Math.atan2(dby, dbx)
+                  - Math.PI * 0.5
+                  - Math.log(distB * 0.007 + 0.1) * 0.72
+                  - time * 0.038;
+
+      // Soft blend — large denominator prevents sharp concentration bands
+      const wA = 1 / (distA + 260);
+      const wB = 1 / (distB + 260);
+      const base = (angA * wA + angB * wB) / (wA + wB);
+
+      return base
+        + Math.sin(x * s        + y * s * 0.7  + time * 0.09) * 0.38
+        + Math.sin(x * s * 1.8  - y * s * 1.3  + time * 0.07) * 0.22
+        + Math.cos(x * s * 0.9  + y * s * 1.6  - time * 0.05) * 0.15
+        + Math.sin((x + y) * s * 0.6 + time * 0.04) * 0.12;
+    }
+
+    // Color palette — mostly cool blue to keep background #07223d dominant
+    const COLORS = [
+      [242, 130,  65],  // orange  (accent)
+      [160,  60,  80],  // crimson (accent)
+      [ 90, 155, 210],  // cool blue — dominant, keeps dark-navy tone
+    ];
+
+    function tick(now) {
+      if (now - START > DURATION) return; // canvas freezes permanently here
+      ctx.fillStyle = FADE;
+      ctx.fillRect(0, 0, W, H);
+
+      for (let i = 0; i < N; i++) {
+        const angle = field(px[i], py[i]);
+        const nx = px[i] + Math.cos(angle) * SPEED;
+        const ny = py[i] + Math.sin(angle) * SPEED;
+
+        // Fade in/out at life boundaries
+        const ratio = pl[i] / pm[i];
+        const lifeAlpha = ratio < 0.08
+          ? ratio / 0.08
+          : ratio > 0.88
+            ? (1 - ratio) / 0.12
+            : 1;
+
+        const [r, g, b] = COLORS[pc[i]];
+        // orange bright, crimson medium, blue subtle — keeps bg dark navy
+        const baseA = pc[i] === 0 ? 0.055 : pc[i] === 1 ? 0.038 : 0.028;
+        ctx.strokeStyle = `rgba(${r},${g},${b},${lifeAlpha * baseA})`;
+        ctx.lineWidth = pc[i] === 2 ? 0.5 : 0.75;
+        ctx.beginPath();
+        ctx.moveTo(px[i], py[i]);
+        ctx.lineTo(nx, ny);
+        ctx.stroke();
+
+        px[i] = nx; py[i] = ny; pl[i]++;
+
+        if (pl[i] >= pm[i] || nx < -2 || nx > W+2 || ny < -2 || ny > H+2) {
+          resetParticle(i);
+        }
+      }
+
+      time += 0.0028;
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+
+    // ── Ripple on CTA click ──
+    document.getElementById('cta-btn').addEventListener('click', function(e) {
+      const s = document.createElement('span');
+      s.className = 'ripple';
+      const rect = this.getBoundingClientRect();
+      const sz   = Math.max(rect.width, rect.height);
+      s.style.cssText =
+        `width:${sz}px;height:${sz}px;` +
+        `left:${e.clientX-rect.left-sz/2}px;` +
+        `top:${e.clientY-rect.top-sz/2}px`;
+      this.appendChild(s);
+      s.addEventListener('animationend', () => s.remove());
+    });
+  </script>
+</body>
+</html>
