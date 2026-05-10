@@ -539,6 +539,10 @@
     const N     = 1000;
     const SPEED = 1.35;
 
+    // Offscreen canvas — рисует частицы независимо от видимости
+    const off  = document.createElement('canvas');
+    const octx = off.getContext('2d');
+
     const px = new Float32Array(N);
     const py = new Float32Array(N);
     const pl = new Float32Array(N);
@@ -557,6 +561,7 @@
       const dpr = window.devicePixelRatio || 1;
       W = innerWidth;
       H = innerHeight;
+      // Основной canvas
       canvas.width  = W * dpr;
       canvas.height = H * dpr;
       canvas.style.width  = W + 'px';
@@ -564,6 +569,12 @@
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.fillStyle = '#07223d';
       ctx.fillRect(0, 0, W, H);
+      // Offscreen: чёрный фон — частицы фейдятся к чёрному, не к синему
+      off.width  = W * dpr;
+      off.height = H * dpr;
+      octx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      octx.fillStyle = '#000000';
+      octx.fillRect(0, 0, W, H);
       for (let i = 0; i < N; i++) { resetParticle(i); pl[i] = Math.random() * pm[i]; }
     }
     window.addEventListener('resize', init);
@@ -592,12 +603,23 @@
 
     const COLORS = [[75,148,218],[125,192,245]];
 
-    const START = performance.now();
+    // Ручное отслеживание фазы дыхания (надёжнее формулы)
+    let breatheVal  = 0;
+    let breatheUp   = true;
+    let phaseStart  = null;
+    const PHASE_MS  = 8000;
 
     function tick(now) {
-      if (now - START > 10000) return;
-      ctx.fillStyle = 'rgba(7,34,61,0.010)';
-      ctx.fillRect(0, 0, W, H);
+      // ── Дыхание: плавный рост/спад по 8 сек ──
+      if (!phaseStart) phaseStart = now;
+      const t = Math.min((now - phaseStart) / PHASE_MS, 1);
+      const eased = t * t * (3 - 2 * t); // smoothstep
+      breatheVal = breatheUp ? eased : 1 - eased;
+      if (t >= 1) { breatheUp = !breatheUp; phaseStart = now; }
+
+      // ── 1. Offscreen: частицы на чёрном фоне ──
+      octx.fillStyle = 'rgba(0,0,0,0.012)'; // fade к чёрному
+      octx.fillRect(0, 0, W, H);
       for (let i = 0; i < N; i++) {
         const angle = field(px[i], py[i]);
         const nx = px[i] + Math.cos(angle) * SPEED;
@@ -605,14 +627,24 @@
         const ratio = pl[i] / pm[i];
         const la = ratio < .08 ? ratio/.08 : ratio > .88 ? (1-ratio)/.12 : 1;
         const [r,g,b] = COLORS[pc[i]];
-        const ba = pc[i]===0 ? .038 : .026;
-        ctx.strokeStyle = `rgba(${r},${g},${b},${(la*ba).toFixed(4)})`;
-        ctx.lineWidth = 1.0;
-        ctx.beginPath(); ctx.moveTo(px[i],py[i]); ctx.lineTo(nx,ny); ctx.stroke();
+        const ba = pc[i]===0 ? .055 : .038;
+        octx.strokeStyle = `rgba(${r},${g},${b},${(la*ba).toFixed(4)})`;
+        octx.lineWidth = 1.0;
+        octx.beginPath(); octx.moveTo(px[i],py[i]); octx.lineTo(nx,ny); octx.stroke();
         px[i]=nx; py[i]=ny; pl[i]++;
         if (pl[i]>=pm[i]||nx<-2||nx>W+2||ny<-2||ny>H+2) resetParticle(i);
       }
       time += 0.0022;
+
+      // ── 2. Main canvas: фон #07223d + offscreen через 'lighter' ──
+      ctx.fillStyle = '#07223d';
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalAlpha = breatheVal;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.drawImage(off, 0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+
       requestAnimationFrame(tick);
     }
     requestAnimationFrame(tick);
