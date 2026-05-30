@@ -16,7 +16,7 @@
 
 - Один файл `vizitka.html` (HTML + `<style>` + `<script>` inline)
 - Без внешних JS-библиотек — только ванильный JS и CSS
-- Шрифт через Google Fonts (Noto Sans Condensed)
+- Шрифт через Google Fonts (Roboto Condensed)
 - Адаптив: mobile-first, breakpoint 480px
 - Фото: `src="photo.jpg.jpg"` (двойное расширение, не переименовывать)
 
@@ -38,8 +38,8 @@
 
 ## Типографика
 
-**Шрифт:** Noto Sans Condensed (Google Fonts)  
-**Подключение:** `Noto+Sans+Condensed:wght@300;400;500;600;700;800;900`  
+**Шрифт:** Roboto Condensed (Google Fonts)  
+**Подключение:** `Roboto+Condensed:wght@300;400;500;600;700;800;900`  
 **Курсив:** не использовать  
 **Все display-элементы:** `text-transform: uppercase`  
 **Тело:** mixed case

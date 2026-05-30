@@ -46,9 +46,10 @@
     .hero {
       position: relative; z-index: 2;
       display: flex; align-items: center;
-      padding: clamp(3.5rem, 8vw, 5rem) 1.5rem clamp(2.5rem, 6vw, 4rem);
+      padding: clamp(5.5rem, 12vw, 8rem) 1.5rem clamp(2.5rem, 6vw, 4rem);
     }
     .hero-inner { width: var(--col); margin: 0 auto; }
+    .hero ~ .s-wrap:not(.s-wrap--tight-top) { margin-top: -clamp(4.5rem, 9vw, 7rem); padding-top: clamp(2rem, 5.5vw, 3.5rem); }
 
     .hero-name {
       font-size: clamp(5rem, 22vw, 9rem);
@@ -93,28 +94,30 @@
     .tagline-sub {
       display: block;
       font-size: 31px;
-      font-weight: 700;
-      letter-spacing: .06em;
+      font-weight: 600;
+      letter-spacing: .04em;
       text-transform: none;
       color: var(--muted);
     }
 
     .hero-cta {
       display: inline-flex; align-items: center; justify-content: center;
-      width: 52px; height: 52px;
-      background: var(--card); color: #716fb0;
+      width: 47px; height: 47px;
+      background: var(--card); color: #a2a6ed;
       text-decoration: none;
       transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+      margin-top: -11px;
       animation: fade-up .5s ease .52s both;
     }
     .hero-cta:hover { transform: translateY(-4px); }
-    .hero-cta svg { width: 24px; height: 24px; fill: currentColor; }
+    .hero-cta svg { width: 34px; height: 34px; fill: currentColor; }
 
     /* ── SHARED ── */
     .s-wrap { position: relative; z-index: 2; padding: clamp(3.5rem, 9vw, 6rem) 1.5rem; }
+    .s-wrap--tight-top { padding-top: 0; }
     .s-inner { width: var(--col); margin: 0 auto; }
 
-    .s-rule { position: relative; z-index: 2; height: 1px; background: rgba(255,255,255,.12); }
+    .s-rule { display: none; }
 
     .s-eyebrow {
       font-size: 27px; font-weight: 300;
@@ -125,7 +128,7 @@
       font-size: clamp(2.8rem, 12vw, 5rem);
       font-weight: 800; line-height: .9;
       letter-spacing: .02em; text-transform: uppercase;
-      color: var(--white); margin-bottom: 2.2rem;
+      color: var(--white); margin-bottom: 1.1rem;
     }
 
     /* ── BENEFITS ── */
@@ -227,17 +230,19 @@
       letter-spacing: .02em; text-transform: uppercase;
       color: #c6c8d7; margin-bottom: 1.8rem;
     }
+    .cta-block h2:first-of-type { margin-bottom: .9rem; }
+    .cta-rule { width: 2.4rem; height: 4px; background: #c7c8da; margin: 0 0 2.6rem; }
     .cta-btn {
       display: inline-flex; align-items: center; gap: .45rem;
-      padding: .45rem 1rem;
-      background: var(--white); color: var(--ink);
+      padding: .45rem 1rem .45rem .55rem;
+      background: #c7c8da; color: var(--ink);
       text-decoration: none;
       font-size: .95rem; font-weight: 700;
       letter-spacing: .03em; text-transform: uppercase;
       transition: transform .3s cubic-bezier(.34,1.56,.64,1);
     }
     .cta-btn:hover { transform: translateY(-3px); }
-    .cta-btn svg { width: 20px; height: 20px; fill: currentColor; }
+    .cta-btn svg { width: 26px; height: 26px; fill: currentColor; }
 
     /* ── MODAL ── */
     .modal-overlay {
@@ -357,7 +362,7 @@
   <div class="s-rule"></div>
 
   <!-- ── CASES ── -->
-  <section class="s-wrap">
+  <section class="s-wrap s-wrap--tight-top">
     <div class="s-inner">
       <p class="s-eyebrow">Кейсы</p>
       <h2 class="s-headline">ЧТО УЖЕ<br>РАБОТАЕТ</h2>
@@ -401,7 +406,9 @@
   <div class="cta-wrap">
     <div class="cta-block">
       <p class="cta-label">Готов начать?</p>
-      <h2 class="cta-headline">НАПИШИ МНЕ —<br><span style="color:#767bd6">ОБСУДИМ ТВОЙ<br>ПРОЕКТ</span></h2>
+      <h2 class="cta-headline">НАПИШИ МНЕ</h2>
+      <div class="cta-rule"></div>
+      <h2 class="cta-headline"><span style="color:#767bd6">ОБСУДИМ ТВОЙ<br>ПРОЕКТ</span></h2>
       <a href="https://t.me/marga_ast" target="_blank" rel="noopener" class="cta-btn">
         <svg viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
         <span>Написать в телеграм</span>
