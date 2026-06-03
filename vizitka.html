@@ -295,9 +295,14 @@
 
     @media (max-width: 480px) {
       .hero  { padding: 3rem 1rem 2rem; }
-      .hero-avatar { width: 100px; height: 100px; margin-top: 0; }
+      .hero-name-row { gap: 0.6rem; }
+      .hero-avatar { width: 90px; height: 90px; margin-top: 3px; }
+      .tagline-label, .tagline-sub { font-size: 18px; }
       .s-wrap { padding: 3rem 1rem; }
       .cta-wrap { padding: 0 1rem 4rem; }
+    }
+    @media (min-width: 375px) and (max-width: 480px) {
+      .hero-name-row { gap: 1.7rem; }
     }
   </style>
 </head>
