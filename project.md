@@ -13,7 +13,7 @@
 
 ## Деплой
 
-- Хостинг: Vercel, URL https://vizitka-work.vercel.app
+- Хостинг: Vercel, URL https://vizitka-offer.vercel.app/ (переименована с vizitka-work 22.06.2026)
 - GitHub-репо: `margaastar-arch/vizitka.git` (remote origin этой папки)
 - Деплоится файл `index.html` (Vercel берёт его как точку входа). Автодеплой при `git push`. CLI `vercel` не использовать (см. memory/feedback_vercel-deploy.md).
 - Фото: `photo.jpg` (сжато до ~27 КБ).
