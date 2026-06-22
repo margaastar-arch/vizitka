@@ -1,0 +1,231 @@
+<h2>Структура диалога бота</h2>
+<p class="subtitle">Полный путь клиента — от визитки до передачи Марге</p>
+
+<style>
+.flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  margin: 2rem auto;
+  max-width: 680px;
+}
+.step {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  gap: 0;
+}
+.step-content {
+  flex: 1;
+  padding: 0.75rem 1.2rem;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.4;
+  position: relative;
+}
+.step-icon {
+  width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.connector {
+  width: 2px;
+  min-height: 22px;
+  background: rgba(255,255,255,0.18);
+  margin: 0 auto;
+}
+.branch-connector {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  position: relative;
+  min-height: 32px;
+}
+.branch-line-v {
+  width: 2px;
+  background: rgba(255,255,255,0.18);
+  flex-shrink: 0;
+}
+.branch-line-h {
+  height: 2px;
+  background: rgba(255,255,255,0.18);
+  flex: 1;
+}
+.branch-arms {
+  display: flex;
+  width: 100%;
+  justify-content: space-around;
+  gap: 12px;
+}
+.branch-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-bottom: 4px;
+}
+.tag-trigger  { background: rgba(255,200,100,0.18); color: #ffc864; }
+.tag-bot      { background: rgba(100,160,255,0.18); color: #64a0ff; }
+.tag-client   { background: rgba(100,220,160,0.18); color: #64dcaa; }
+.tag-marga    { background: rgba(220,120,255,0.18); color: #dc78ff; }
+
+.bg-trigger  { background: rgba(255,200,100,0.10); border: 1px solid rgba(255,200,100,0.25); }
+.bg-bot      { background: rgba(100,160,255,0.10); border: 1px solid rgba(100,160,255,0.25); }
+.bg-client   { background: rgba(100,220,160,0.10); border: 1px solid rgba(100,220,160,0.25); }
+.bg-marga    { background: rgba(220,120,255,0.10); border: 1px solid rgba(220,120,255,0.25); }
+.bg-split    { background: rgba(255,255,255,0.05); border: 1px dashed rgba(255,255,255,0.2); }
+
+.step-label { font-weight: 600; color: rgba(255,255,255,0.9); }
+.step-desc  { color: rgba(255,255,255,0.55); font-size: 0.83rem; margin-top: 2px; }
+
+.h-line {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0;
+}
+.h-seg { height: 2px; background: rgba(255,255,255,0.18); }
+.down-arm { width: 2px; background: rgba(255,255,255,0.18); }
+</style>
+
+<div class="flow">
+
+  <!-- 1. Триггер -->
+  <div class="step">
+    <div class="step-icon">🔗</div>
+    <div class="step-content bg-trigger">
+      <span class="tag tag-trigger">Триггер</span>
+      <div class="step-label">Клик на кнопку «Написать в Telegram» на визитке</div>
+      <div class="step-desc">Ссылка ведёт на бота: t.me/marga_bot?start=vizitka</div>
+    </div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 2. Приветствие -->
+  <div class="step">
+    <div class="step-icon">👋</div>
+    <div class="step-content bg-bot">
+      <span class="tag tag-bot">Бот</span>
+      <div class="step-label">Приветствие</div>
+      <div class="step-desc">Коротко кто такая Марга + один вопрос для сегментации</div>
+    </div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 3. Развилка -->
+  <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <div style="display:flex;width:80%;justify-content:space-around;align-items:flex-start;gap:12px;">
+
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+        <div style="width:2px;height:20px;background:rgba(255,255,255,0.18);"></div>
+        <div class="step-content bg-split" style="text-align:center;padding:0.5rem 0.8rem;">
+          <span class="tag tag-client">Малый бизнес</span>
+          <div class="step-desc">до ~20 человек</div>
+        </div>
+        <div style="width:2px;height:20px;background:rgba(255,255,255,0.18);"></div>
+        <div class="step-content bg-bot" style="font-size:0.83rem;">
+          <div class="step-label">6 вопросов брифа</div>
+          <div class="step-desc">по одному, разговорно</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+        <div style="width:2px;height:20px;background:rgba(255,255,255,0.18);"></div>
+        <div class="step-content bg-split" style="text-align:center;padding:0.5rem 0.8rem;">
+          <span class="tag tag-client">Средний бизнес</span>
+          <div class="step-desc">от ~20 человек</div>
+        </div>
+        <div style="width:2px;height:20px;background:rgba(255,255,255,0.18);"></div>
+        <div class="step-content bg-bot" style="font-size:0.83rem;">
+          <div class="step-label">7 вопросов брифа</div>
+          <div class="step-desc">по одному, разговорно</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 4. Время -->
+  <div class="step">
+    <div class="step-icon">📅</div>
+    <div class="step-content bg-bot">
+      <span class="tag tag-bot">Бот</span>
+      <div class="step-label">Запрос удобного времени</div>
+      <div class="step-desc">«Когда вам удобно созвониться? Укажите 2–3 варианта дней и времени»</div>
+    </div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 5. Клиент отвечает -->
+  <div class="step">
+    <div class="step-icon">✍️</div>
+    <div class="step-content bg-client">
+      <span class="tag tag-client">Клиент</span>
+      <div class="step-label">Называет удобное время</div>
+      <div class="step-desc">Свободный текст — бот сохраняет как есть</div>
+    </div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 6. Подтверждение клиенту + уведомление Марге -->
+  <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
+    <div style="display:flex;width:80%;justify-content:space-around;align-items:flex-start;gap:12px;">
+
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+        <div style="width:2px;height:20px;background:rgba(255,255,255,0.18);"></div>
+        <div class="step-content bg-bot">
+          <span class="tag tag-bot">Бот → Клиент</span>
+          <div class="step-label">Подтверждение</div>
+          <div class="step-desc">«Спасибо! Марга напишет вам в течение 24 часов»</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;align-items:center;flex:1;">
+        <div style="width:2px;height:20px;background:rgba(255,255,255,0.18);"></div>
+        <div class="step-content bg-marga">
+          <span class="tag tag-marga">Бот → Марга</span>
+          <div class="step-label">Карточка клиента</div>
+          <div class="step-desc">Сегмент + все ответы + предложенное время</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="connector"></div>
+
+  <!-- 7. Марга -->
+  <div class="step">
+    <div class="step-icon">📞</div>
+    <div class="step-content bg-marga">
+      <span class="tag tag-marga">Марга</span>
+      <div class="step-label">Выходит на созвон</div>
+      <div class="step-desc">Уже со шпаргалкой и всеми ответами клиента на руках</div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="text-align:center;margin-top:0.5rem;">Посмотри на схему — всё выглядит правильно или что-то нужно изменить?</p>

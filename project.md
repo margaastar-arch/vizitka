@@ -17,7 +17,7 @@
 - GitHub-репо: `margaastar-arch/vizitka.git` (remote origin этой папки)
 - Деплоится файл `index.html` (Vercel берёт его как точку входа). Автодеплой при `git push`. CLI `vercel` не использовать (см. memory/feedback_vercel-deploy.md).
 - Фото: `photo.jpg` (сжато до ~27 КБ).
-- Внимание: `index.html` и `vizitka.html` — почти копии. Реальный прод — `index.html` (он чуть новее: desktop gap аватарки 2rem). `vizitka.html` отстаёт на пару отступов. При правках синхронизировать оба или вести только index.html.
+- Единственный исходник страницы — `index.html`. Дубль `vizitka.html` удалён 2026-06-22, чтобы не путаться.
 
 ## Контакты на странице
 
